@@ -1,0 +1,304 @@
+---
+title: 'Introduction to R'
+subtitle: 'Retreiving, Cleaning, Analyzing, and Visualizing Data'
+author: "Jason Freels"
+date: "`r format(Sys.Date(),'%d %B %Y')`"
+output: 
+  slidy_presentation:
+    css: '../resources/intro.css'
+    smart: false
+    fig_caption: yes
+footer: "Introduction to R: Retreiving, Cleaning and Analyzing Data"
+graphics: yes
+---
+
+# Retrieving, Cleaning and Analyzing Data
+
+```{r, echo=FALSE}
+source('../resources/setup.R')
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Overview
+
+- This presentation illustrates several of R's capabilities to extract and visualize information from a real data set
+
+- For this example, the data set is located at <a target=' ' href='http://fueleconomy.gov/feg/epadata/vehicles.csv.zip'>http://fueleconomy.gov</a>
+
+    + Automobile fuel consumption data (model years 1984 - 2017) 
+
+    + $83$ columns $\times$ 38072 rows
+    
+    + A list of definitions for the columns can be found <a target=' ' href='http://fueleconomy.gov/feg/ws/index.shtml#vehicle'>Here</a>
+
+
+## Process We'll Follow
+
+- Step 1: Retrieve the data 
+
+    + Download the data as a .zip file from a URL
+
+    + Unzip the file and extract the .csv file containing the data
+
+    + Read the data from the .csv file into R for further processing
+
+- Step 2: Clean the data
+
+    + Visually review the and sort the data set
+
+    + Remove extraneous columns and rows
+
+    + Transform pertinent data as needed
+
+- Step 3: Analyze the data
+
+    + Use step-wise regression to determine best combination of factors to include in the model
+
+    + Use multiple linear regression to predict future observations 
+
+- Step 4: Produce visualizations to communicate the results
+
+    + Static plots 
+
+    + Interactive widgets and/or apps
+
+## Required Packages
+
+- Before getting started let's make sure you have the following packages available and loaded
+
+    + `dplyr` - Tools to simplify data cleaning 
+
+    + `data.table` - Similar to `dplyr`, but MUCH faster (useful for large datasets)
+
+    + `readr` - Tools to read data into R from various sources and file types
+
+    + `DT` - Creates interactive HTML5 tables
+
+    + `shinythemes` - Provides styling for shiny apps and gadgets
+
+    + `leaps` - Functions for stepwise regression
+
+- Copy/paste the following code into the R console to 
+
+    + Check if each package already exists in your package library `.libPaths()`
+
+    + Download and install the package if it's not found in `.libPaths()`
+
+    + Call `library()` to load the functions contained in each package into the current R session
+
+```{r, eval=FALSE}
+pkgs <- c('dplyr','data.table','readr','DT','shinythemes')
+
+for(i in 1:length(pkgs)) {
+  
+if(!pkgs[i]%in%installed.packages())  install.packages(pkgs[i])
+
+  do.call('library', args = list(pkgs[i]))
+}
+```
+
+## Notes
+
+- Sometimes you see code written as shown below
+
+- This is a simple example, but when there are many functions it gets confusing figuring out which package each function lives in
+
+```{r, eval=FALSE}
+library(data.table)
+library(dplyr)
+
+my.data    <- fread('somefile.csv')
+my.summary <- summarise(my.data, mean('column1'))
+```
+
+- Therefore, I'll do my best to connect each function with its package as follows   
+
+```{r, eval=FALSE}
+library(data.table)
+library(dplyr)
+
+my.data    <- data.table::fread('somefile.csv')
+my.summary <- dplyr::summarise(my.data, stats::mean('column1'))
+```
+
+# Step 1 - Retrieve the Data
+
+## Download the data as a .zip file from a URL
+
+a. Store the URL for the 'vehicles.csv.zip' file as a character string 
+
+```{r}
+URL <- 'http://fueleconomy.gov/feg/epadata/vehicles.csv.zip'
+```
+
+b. Use `tempfile()` to create a temporary file named `temp`
+
+    + We'll use `temp` to hold 'vehicles.csv.zip' so we can unzip it
+
+    + Once we're finished with `temp` we'll remove it
+
+```{r}
+temp <- base::tempfile()
+```
+
+c. Use `download.file()` to download 'vehicles.csv.zip' from `URL` into the `temp`
+
+```{r}
+utils::download.file(url = URL, 
+                     destfile = temp)
+```
+
+## Unzip the file and extract the .csv file containing the data
+
+a. Use `unzip()` to extract the vehicles.csv from `temp` 
+
+    + `unzip()` will save vehicles.csv under the same name 
+
+    + vehicles.csv will be saved in `getwd()` - the current working directory
+
+```{r}
+utils::unzip(zipfile = temp, 
+             files = "vehicles.csv")
+```
+
+## Read the data from the .csv file into R for further processing
+
+- Use `fread()` to read the data from vehicles.csv into R as a `data.table`
+
+```{r}
+epa.data <- data.table::fread('vehicles.csv')
+```
+
+- We could have used `read_csv()` to read the data from vehicles.csv into R as a `tibble`
+
+```{r}
+epa.data <- readr::read_csv('vehicles.csv')
+```
+
+- Or, we could have used `read.csv()` to read the data from vehicles.csv into R as a `data.frame`
+
+    + However, this is an older function that is slow and has been known to fail for large datasets
+
+    + Both `fread()` and `read_csv()` are better options
+
+```{r}
+epa.data <- utils::read.csv('vehicles.csv')
+```
+
+- Finally, we need to use `unlink()` to remove `temp`
+
+```{r}
+base::unlink(temp)
+```
+
+- You should now have an object called `epa.data` stored in your current workspace and a file called vehicles.csv saved in your working directory
+
+    + To see what objects exist in the current R session type `base::ls()`
+
+    + To see what files are saved in the current working directory type `base::list.files()`
+
+- If `epa.data` and vehicles.csv exist are found - move on to Step 2  
+
+# Step 2 - Clean The Data prior to beginning the analysis
+
+## Visually review the data
+
+- First, use `View()` and `head()` to see what columns are in the data set
+
+    + `head()` returns the first 6 rows of the data set
+
+    + `View()` produces a table displaying the object (if run in RStudio the table is interactive) 
+
+```{r}
+utils::View(utils::head(epa.data))
+```
+
+## Remove Extraneous Columns & Rows
+
+- For this example, our interest is in analyzing MPG data for automobiles with gasoline engines - therefore, we might clean the data as follows 
+
+- Only keep rows for which `mpgData` equals Y using `dplyr`
+
+```{r}
+epa.data <- dplyr::filter(epa.data, mpgData=='Y')
+```
+
+- Remove rows for which `atvType` equals Hybrid or Plug-in Hybrid using `base`
+
+```{r}
+epa.data <- base::subset(epa.data, !atvType%in%c('Hybrid','Plug-in Hybrid'))
+```
+
+- Remove The 'createdOn' 'modifiedOn' columns using `base`
+
+```{r}
+epa.data[, c('createdOn','modifiedOn')] <- NULL
+```
+
+- The 'phevCity', 'phevHwy', and 'phevComb' columns don't pertain to gas engines let's remove them using the `data.table` package
+
+- Notice that the `data.table` syntax differs slightly from that of base R - although both produce the same result
+
+```{r}
+epa.data <- data.table::as.data.table(epa.data)
+
+epa.data[, c('phevCity','phevHwy', 'phevComb') := NULL]
+```
+
+- The first four columns aren't helpful - let's remove the first four columns using `dplyr` 
+
+- <focus>Be careful indexing columns by number</focus>
+
+```{r}
+epa.data <- dplyr::select(epa.data, -(barrels08:charge240))
+```
+
+- Finally, there's usually a collection of columns that can be time consuming to remove
+
+- For those columns we can create a shiny gadget to make this process much faster
+
+- In the resources directory there's a file called `gadgets.R` containing a function called `clean_columns` 
+
+- To use this function source the gadgets.R file to load the function in the workspace
+
+```{r}
+base::source('resources/gadgets.R')
+```
+
+- Now, run the function on `epa.data`
+
+```{r}
+clean_columns(epa.data)
+```
+
+- The `clean_columns` function returns a list of two objects
+
+    + `data` - A data.frame containing the columns that were not removed
+
+    + `script` - The code to reproduce the removal actions taken 
+
+- We forgot to save the object `data` under the name `epa.data`
+
+- However, R saves the last value returned to the workspace under an object called `.Last.value` 
+
+- We can still redefine `epa.data` with the following
+
+```{r}
+epa.data <- .Last.value$data
+```
+
+- You can make your choices as to what columns to remove
+
+- However, I've already created a clean data set and saved it as a file called cleanData.csv
+
+- We'll use this data set in <red>Step 3: Analyze the data</red>
+
+# Step 3: Analyze the data
+
+- In this step we will perform a stepwise regression on the cleaned data set to determine which 5-parameter model best explains the variance in three different responses
+
+    + City MPG 
+
+    + Highway MPG
+
+    + Combined MPG

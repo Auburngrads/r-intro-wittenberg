@@ -1,0 +1,898 @@
+---
+title: "Introduction to R"
+subtitle: 'Environments and Objects'
+author: "Jason Freels"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output: 
+  slidy_presentation:
+    css: '../resources/intro.css'
+    smart: false
+    fig_caption: yes
+footer: "Introduction to R - Environments and Objects"
+graphics: yes
+---
+
+```{r intro, echo=FALSE,message=FALSE, warning=FALSE}
+source('../resources/setup.R')
+library(survival)
+```
+
+# OVERVIEW
+
+## In this presentation...
+
+- Describe the types of elements used to create R objects
+
+- Define and create the primary classes of R objects
+
+    + Vectors
+
+    + Matrices
+
+    + Data frames
+
+    + Lists
+
+    + Functions
+
+- Introduce more complex objects
+
+# R OBJECTS: Elements
+
+## In R Elements Have an Atomic Structure
+
+- Elements aren't really objects in R, but are single-valued vectors
+
+- However, the term 'element' is helpful to distinguish between types of objects in a vector 
+
+- Elements Have One of Six Atomic modes
+
+- Function calls on objects containing elements with different atomic modes coerces the "higher" mode element to that of the "lowest" mode element
+
+<center>**raw** $\rightarrow$ **logical** $\rightarrow$ **integer** $\rightarrow$ **numeric** $\rightarrow$ **complex** $\rightarrow$ **character**</center>
+
+<br>
+
+```{r} 
+2 < "george"
+```
+
+```{r} 
+2 > "george"
+```
+
+```{r} 
+-2 < "-3"
+```
+
+```{r} 
+-2 < FALSE
+```
+
+## Coercing Elements to Other Atomic Modes
+
+- In many cases you can coerce elements and objects to higher atomic modes
+
+```{r} 
+as.complex(-2)
+```
+
+```{r} 
+as.character(-2)
+```
+
+```{r} 
+as.logical(-2) ### Only 0 returns as FALSE
+```
+
+## Logical operators applied to numeric elements
+
+```{r} 
+2 == 3
+```
+
+```{r} 
+2 > 3
+```
+
+```{r} 
+2 <= 3
+```
+
+```{r} 
+2 < 3 | 2 > 3  ### Is EITHER 2<3 OR 2>3 true?
+```
+
+```{r} 
+2 < 3 & 2 > 3  ### Are BOTH 2<3 AND 2>3 true?
+```
+
+## Mathematical Functions on Numeric Elements
+
+```{r}
+sqrt(4)
+```  
+
+```{r}
+exp(1)
+```  
+
+```{r}
+log(1)
+``` 
+
+```{r}
+log10(1)
+``` 
+
+```{r}
+ceiling(pi)
+``` 
+
+```{r}
+floor(pi)
+``` 
+
+```{r}
+factorial(5)
+``` 
+
+```{r}
+choose(4,2)
+``` 
+
+# R Objects: Vectors
+
+## Vectors are the Base Data Structure in R
+
+- Scalars are interpreted as a vectors containing a single element  
+
+- Vectors can be created using one of four functions
+
+    + `a:b` creates a vector of integer-differenced values $\in [a,b]$
+
+    + `c( )` concatenates various elements or vectors together
+
+    + `rep( )` repeats elements or patterns of elements
+
+    + `seq(m,n,o)` generates a number sequence between $m$ and $n$ in $o$ increments
+
+- "Binding" elements of different modes into a vector will coerce all of the elements into the lowest atomic mode
+
+- <focus>Functions can be applied to entire vectors - without loops</focus>
+
+## The Concatenate Function - c( )
+
+- `c( )` Coerces elements with various atomic modes into a vector object
+
+- Each element in the vector will have same atomic mode - whichever mode is lowest among the elements being concatenated
+
+```{r} 
+A <- c(1,2,3,4,5) ; A
+```
+
+```{r} 
+B <- c(6,7,8,9,10) ; B
+```
+
+```{r} 
+C <- c(A,B,"George") ; C  ### Coerces the numbers in A & B to characters 
+```
+
+## The Repeat Function - rep( )
+
+- Vector formed by repeating an element or pattern of elements 
+
+```{r} 
+D <- rep(1,10); D
+```
+
+```{r} 
+E <- rep(c(1,2,3,4),5); E
+```
+
+```{r} 
+G <- rep(c(1,2,3,4), each=5); G
+```
+
+## The Sequence Function - seq( )
+
+- Vector formed by sequencing elements, in a specified interval or to a specified length
+
+```{r} 
+H <- seq(1,10) ; H
+```
+
+```{r} 
+I <- seq(4,20,by=4) ; I
+```
+
+```{r} 
+J <- seq(1,2, by=.1) ; J
+```
+
+```{r} 
+K <- seq(10,2, by=-0.5) ; K
+```
+
+```{r} 
+L <- seq(10,2, length=7) ; L
+```
+
+## Vector Structure
+
+- Let's look at the structure of the vector `J` defined previously
+
+- To do this we can use the structure function `str( )`
+
+- <focus>Remember, str( ) is every R users best friend</focus>
+
+```{r}
+str(J)
+```
+
+- `num` - shows that this is a numeric vector
+
+- `[1:11]` - shows that `J` has 1 dimension with values in positions 1-11
+
+- As will be shown when discussing matrices, the dimensions of an $11 \times 11$ matrix are expressed as `[1:11, 1:11]` 
+
+## Logical Functions on Vectors
+
+- Is <u>either</u> $(\overline{A}<\overline{B})$ <u>or</u> $(\overline{A}>\overline{B})$ true? 
+
+```{r} 
+A < B | A > B
+```
+
+```{r} 
+A < B || A > B
+```
+
+- Are <u>both</u> $(\overline{A}<\overline{B})$ <u>and</u> $(\overline{A}>\overline{B})$ true?
+
+```{r} 
+A < B & A > B
+```
+
+```{r} 
+A < B && A > B
+```
+
+## Mathematical Functions on Vectors
+
+```{r} 
+A + B
+```
+
+```{r} 
+A * B ## Scalar multiplication
+```
+
+```{r} 
+A%*%B ##  Matrix multiplication
+```
+
+```{r}
+round(sqrt(A),digits = 3)
+```  
+
+```{r}
+round(exp(A),digits = 2)
+```  
+
+```{r}
+round(log(A),digits = 3)
+``` 
+
+```{r}
+round(log10(A),digits=3)
+``` 
+
+```{r}
+sum(A)
+``` 
+
+```{r}
+cumsum(A)
+``` 
+
+```{r}
+prod(B)
+``` 
+
+```{r}
+cumprod(B)
+``` 
+
+```{r}
+t(A) ### Returns the transpose of A
+```
+
+```{r}
+t(t(A))
+```
+
+```{r}
+abs(-B/2)
+```
+
+```{r}
+table(c(A,B/2)) ### displays how many times each unique value is observed 
+```
+
+## Accessing And Assigning Vector Elements Using Brackets
+
+```{r}
+A ### Recall the value of the vector A defined earlier
+```
+
+```{r}
+A[3] ## Returns the 3rd element of A
+```
+
+```{r}
+A[1] <- 0.1 ; A ## Assigns the 1st element of A as 0.1
+```
+
+```{r}
+A[-1] <- 4 ; A ## Assigns all but the 1st element of A as 4 
+```
+
+```{r}
+A < 0.5
+```
+
+```{r}
+A[4] == 2
+```
+
+# R OBJECTS: Matrices
+
+## Matricies combine Atomic Vectors in a 2-dimensional Framework
+
+- In R, matrices are created using one of three methods
+
+    + 1) Define the dimensions of a matrix and add elements later
+
+    + 2) Adding elements interactively with `edit( )`
+
+    + 3) Merge or bind vectors together (must be of equal length) 
+
+- Matrices are atomic, i.e. every element has the same atomic mode 
+
+- Creating matrices from elements or vectors with different atomic modes will coerce every element to the lowest mode 
+
+## Building Matrices 1 - Specifying Individual Elements
+
+- The `matrix( )` function is used to create a matrix object with the following arguments
+
+    + `data` - Values to include in the matrix
+
+    + `ncol` - Number of columns
+
+    + `nrow` - Number of rows
+
+    + `byrow` - Fill the matrix rows or by columns?
+
+    + `dimnames` - Names applied to row and column headers 
+
+```{r}
+mat <- matrix(data = 1:9, 
+              ncol = 3, 
+              nrow = 3, 
+              byrow = TRUE, 
+              dimnames = list(c('A','B','C'),
+                              c('D','E','F'))) 
+mat
+```
+
+## Building matrices 2 - interactively with `edit( )`
+
+- This interactive 'GUI' method can be very fast, but requires user input
+
+- Start by creating a $1 \times 1$ numeric matrix - the value you use doesn't matter
+
+```{r}
+mat2 <- matrix(1)
+```
+
+- Then, use `edit()` to bring up a spreadsheet-style editor window
+
+- Make whatever changes you like to the matrix, then hit <orange>file $\rightarrow$ close</orange>
+
+- Note <focus>You must re-define the matrix object or your changes will not be saved</focus>
+
+```{r, eval=FALSE}
+mat2 <- edit(mat2)
+```
+
+## Building Matrices by Merging Vectors
+
+- Vectors <focus>of the same length</focus> can be merged to build matrices
+
+- Note the use of `c( )` to ensure that `vec1, vec2, vec3, vec4` are all part of the argument `data`, and not considered as four separate arguments
+
+```{r}
+vec1 <-  1:4
+vec2 <-  5:8
+vec3 <-  9:12
+vec4 <- 13:16
+vec.mat <- matrix(data = c(vec1, vec2, vec3, vec4), 
+                  ncol = 4) 
+vec.mat
+```
+
+- Matrices can also be built with `rbind` & `cbind` to merge vectors as rows or columns
+
+- Note that and `cbind` will coerce every element to the same atomic mode
+
+```{r}
+rbind(vec1, vec2, vec3, vec4)
+```
+
+```{r}
+cbind(vec1, vec2, vec3, vec4)
+```
+
+## Numerical operations on matricies
+
+- Matrix operations that are often of interest include
+
+    + Returning the diagonal elements of a matrix
+    
+    + Computing the determinant of a matrix
+
+    + Finding the inverse of a matrix
+
+    + Finding the transpose of a matrix
+
+    + Computing the Eigenvalues and Eigenvectors
+
+- To demonstrate matrix operations, let's first create a $5 \times 5$ matrix of random integers in $[1,50]$
+
+```{r}
+mat1 <- matrix(sample(1:50,size = 25), 
+               nrow = 5, 
+               byrow = T) 
+mat1
+```
+
+```{r}
+diag(mat1)  ### Diagonal elements `mat1`
+```
+
+```{r}
+det(mat1)   ### Determinant of `mat1`
+```
+
+```{r}
+solve(mat1) ### Returns the inverse `mat1` if it exists
+```
+
+```{r}
+t(mat1) ### Returns the tranpose of `mat1`
+```
+
+```{r}
+eigen(mat1) ### Returns the eigenvalues and eigenvectors of `mat1`
+```
+
+## Accessing & Assigning matrix components
+
+- Matrix elements can be accessed by specifying their `[row,column]` values
+
+- Matrix elements can also be accessed by specifying a single `[element.index]`  
+
+- Matrix rows/columns can be accessed by specifying `[row,]` or `[,column]`
+
+```{r}
+mat1[4,3]
+```
+
+```{r}
+mat1[5,5]
+```
+
+```{r}
+mat1[7]
+```
+
+```{r}
+mat1[24]
+```
+ 
+```{r}
+mat1[1,] ### Returns the first row of mat1
+```
+
+```{r}
+mat1[,3] ### Returns the third column of mat1
+```
+
+# R OBJECTS: Arrays
+
+## Arrays are element Repositories With More than Two Dimensions
+
+- The syntax for function calls on arrays are similar to what was described for vectors and matrices
+
+- Arrays are atomic
+
+# R OBJECTS: Data Frames
+
+## Data Frames Are The Most Common Data Structure In R
+
+- Data frames are NOT atomic - but are comprised of atomic column vectors
+
+- Data frames are like atricies - but each column can have a different atomic mode
+
+## Creating data frames
+
+- Data frames are primarily created by using the function `data.frame()` 
+
+    + NEVER use `rbind` or `cbind` to create a data.frame
+
+    + Recall `rbind` & `cbind` coerces every element in every vector to the lowest atomic mode
+
+```{r}
+age<-c(23, 35, 19)              ### Numeric vector
+sex<-c("Male", "Female", "Yes") ### Character vector
+job<-c(TRUE, TRUE, FALSE)       ### Logical vector
+data.frame(age,sex,job, row.names = c("Jim", "Joe", "Ray"))
+```
+
+- Data frames can also be created by loading local or online files
+
+    + `read.table` loads tab-delimited data from .txt files (NotePad)
+
+    + `read.csv` creates a data.frame from .csv files (installs w/ base R)
+
+    + `read_excel` creates a data.frame from .xls and .xlsx files (requires the readxl package)
+
+```{r, eval=FALSE}
+read.csv("http://www.fdic.gov/bank/individual/failed/banklist.csv", header = T)
+```
+
+## Accessing data frames components
+
+R installs with several data sets, such as `mtcars`
+
+```{r}
+head(mtcars)
+```
+
+```{r}
+class(mtcars)
+```
+
+### Working With Data Frames
+
+
+```{r}
+str(mtcars)
+```
+
+The `$` operator is used to call data frame columns as `mtcars$cyl` 
+
+# R OBJECTS: Lists
+
+## Lists Are The Most General & Powerful Object Type in R
+
+- Think of lists as a suitcase - they can be used to store everything
+
+    + Vectors
+
+    + Matrices
+
+    + Data Frames
+
+    + Functions
+
+    + Even other lists
+
+Example: Function outputs You write script that inputs the `cars` data set & creates several outputs
+
+- The data set itself (a data.frame or matrix)
+
+- Some summary statistics of the data set `summary(cars)`
+
+- The maximum value of the log-likelihood function $\left(\mathcal{L}\right)$ a $1\times 1$ vector
+ 
+You can assign each of these objects to a list  
+
+## Atomic Vectors & Lists
+
+- Concatenating numeric, logical and character elements results in an atomic-character vector
+
+    + The vector is <u>**atomic**</u> because every element has the same atomic mode
+
+    + Recall that `c( )` coerces every element to the lowest atomic mode that will ensure homogeneity across the entire vector
+
+```{r}
+V <- c(3,TRUE,"george") ; V
+```
+
+- Lists preserve the atomic mode of each object stored in the list
+
+- And because lists can hold entire objects, the structure of each object stored in the list is preserved
+
+```{r}
+list1 <- list(3,TRUE,"george") ; list1
+```
+
+```{r}
+list2 <- list(head(mtcars),"george", A) ; list2 
+```
+
+```{r}
+str(list2)
+```
+
+### Accessing & Assigning List Components
+
+Objects assigned to a list may be accessed by using double brackets `[[ ]]`
+
+```{r}
+ list1[[1]]
+```
+
+## Accessing & Assigning Components Of Objects Inside A List
+
+- Components of objects stored in a list may also be accessed by 
+
+    + 1) Using double brackets `[[ ]]` to call the vector, matrix, list, or data frame inside the list 
+
+    + 2) Either `[ ]`, `[[ ]]`, or `$` to call the desired component of the object inside the list 
+
+```{r}
+ list2[[3]][1]
+```
+
+```{r}
+ list2[[1]]$mpg
+```
+
+# R OBJECTS: Functions
+
+## One Object to Rule Them All
+
+- Functions convert input objects into either output objects or plots
+
+    + Functions can take any object as an argument, even other functions 
+
+    + Functions operate on distinct classes of objects (or functions)
+
+    + Functions can return objects of the same class as the input objects or create a completely new class of object
+
+## Parts of an R Function
+
+- Functions are comprised of <red>four</red> basic parts 
+
+    + The function <u>__symbol__</u> used to call the function
+
+    + The <u>__formal argument(s)__</u>
+
+    + The <u>__informal argument(s)__</u>
+
+    + The function <u>__body__</u> defining the operations to be performed
+
+## Creating and examining a function
+
+- The code below creates an example function called `foo( )`, where...
+
+    + `foo` $\hspace{10pt}$ - is the function <u>__symbol__</u> used to call the function
+
+    + `x` $\hspace{18pt}$ - is a <u>__formal argument__</u>
+
+    + `a,b` $\hspace{10pt}$ - are <u>__informal arguments__</u>
+
+    + `a*x+b` $\hspace{1pt}$ - is the function <u>__body__</u> defining the operations to be performed
+
+```{r}
+foo <- function(x) { ### Values inside ( ) are interpreted as function arguments
+  
+  a <- 1 ; 
+  b <- 2      ### Values separated by ";" are interpreted as separate lines 
+  c <- a*x+b
+  
+  return(c)
+}                  ### Values inside { } are interpreted as the function body
+```
+
+- The function `foo` is evaluated by specifying a value for the formal argument
+
+    + In general, formal arguments can be numeric, character, or even other functions
+
+    + For the function `foo`, the formal argument `x` must be either a vector or a matrix
+    
+    + Values are not specified for the informal arguments `a` and `b` since they we defined in the body of the function
+
+```{r}
+foo(2)
+```
+
+## Lexical Scoping Rules
+
+- A problem arises, however, if I want to return the value of either `a` or `b` - an error is produced
+
+    + This error results from the 'lexical scoping rules' on which R was built
+
+    + Lexical scoping defines 'where' each object is defined and how we can interact with it 
+
+```{r, eval=FALSE}
+b  ### Error: object "b" not found
+```
+
+- When the function `foo( )` was created, three things happened
+
+    + A new environment was created
+    
+    + The <u>__body__</u> of the function `foo( )` was assigned to this new environment
+    
+    + The <u>__symbol__</u> `foo` was assigned to the parent environment of this new environment
+
+- The lexical scoping rules define how R searches for a requested value
+
+    + First, R searches the current environment for the requested value
+
+    + If the value is not found in the current environment, R then searches the parent environment to the current environment
+
+    + If necessary, R continues to search sucessive parent environments until the Global Environment is reached
+
+    + If the value isn't found in the Global Environment, R moves to the parent of the Global Environment - the Empty Environment
+    
+    + Upon reaching the Empty Environment, R stops searching and returns an error that the value cannot be found
+
+- Thus, is the case of the function `foo( )`, `a` and `b` could not be found because...
+
+    + They are local variables, assigned in the body of `foo`
+
+    + Our request to find `a` and `b` was made in the parent environment to the body of `foo( )`, where only the symbol `foo` is available 
+
+### Lexical Scoping Example
+
+## Let's demonstrate where `foo` lives
+
+- First, let's determine what is the current environment
+
+- <focus>Note that this entire presentation has it's own environment</focus>
+
+```{r}
+environment( )
+```
+
+- Now, let's see in which environment the <u>__symbol__</u> `foo` is defined
+
+- This should be the same environment as that's listed above
+
+- BTW, if you refresh this presentation, this environment will be different
+
+```{r}
+environment(foo)
+```
+
+- The body of the function is defined in its own environment that is a child to the environment listed above
+
+- This can be seen by examining the structure of `foo( )`
+
+```{r}
+str(foo) 
+```
+
+## What about when you're not in a presentation
+
+- When R/RStudio is opened the current environment will be the Global environment
+
+- Each new function created will have its own enclosing environment - only the function symbol can be accessed from the Global environment 
+
+## Are there ways to make `a` and `b` available in the current environment?
+
+- Yes, there are at least three ways to do this
+
+    + 1) Define the `a` and `b` outside of the body of `foo( )`
+
+    + Use `Return( )` to ensure `foo( )` returns `a` and `b` every time it is run
+
+    + Use the deep-assignment operator `<<-`
+
+- Each of these methods are shown below
+
+```{r}
+a <- 1 ; b <- 2 # Moving the informal arguments outside the function
+foo <- function(x) { 
+        a*x+b
+}
+foo(2) ; a ; b
+```
+
+```{r, error=TRUE}
+foo <- function(x) { 
+    a <- 1 ; b <- 2
+    c <- a*x+b
+    return(list(a,b,c))
+}
+foo(2)
+```
+
+```{r}
+foo2<-function(x) { 
+    a <<- 1 ; b <<- 2
+    c <- a*x+b
+}
+foo(2) ; a ; b
+```
+
+### R Environments
+
+R arrives at the same result regardless of where `a` and `b` are defined
+
+This is due to search procedure defined by the lexical scoping rules
+
+1) R first searches the function's enclosing environment for `a` and `b`
+2) If not found in the enclosing environment, R searches the parent environment
+3) This continues until R finds `a` and `b` or the search reaches the empty environment
+
+The empty environment is the parent to the global environment
+
+### `Return( )` Allows Multiple Function Outputs
+
+
+
+### Use `<<-` to Assign in Parent Environment
+
+
+The deep-assignment operator allows an inheritance to the parent environment
+
+
+Use carefully, `<<-` can change base R values, giving unexpected side effects 
+
+### Lexical Scoping Rules Example - 2
+
+## Look at the code chunk below 
+
+- What value do you think will be returned for `bar(2)`?
+
+- Don't scroll down until you've decided on an answer
+
+```{r, echo=TRUE, results='hide'}
+a<-1
+b<-2
+
+foo<-function(x) {
+    a*x+b
+}
+
+bar<-function(x){
+  a<-2
+  b<-1
+  foo(x)
+}
+
+bar(2)
+```
+
+## What value did you choose?
+
+- The correct answer is 5
+
+- Rationale
+
+    + `foo` cannot access the values of `a` and `b` defined within `bar`  
+
+    + The only values R can find for `a` and `b` are those defined in the global environment
+
+    + The `a` and `b` values defined in `bar` are threfore ignored
+
+```{r}
+bar(2)
+```
+
+# That Was A Lot!
+
+<br>
+
+<center><img src="../images/stu-dying.gif" width="500px"></center>
+
+<br>
+
+- Thanks for sticking with it!
